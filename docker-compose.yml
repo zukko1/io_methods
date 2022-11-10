@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  api-io:
+    container_name: api-io
+    build:
+      context: "./api"
+      target: start
+    links:
+      - mongo-io
+      - cpu-io
+    environment:
+      - "CPU=http://cpu-io:5000"
+    ports:
+      - "3200:3200"
+    volumes:
+      - ./api:/usr/src/app/api
+  front-io:
+    container_name: front-io
+    build:
+      context: "./front"
+    links:
+      - api-io
+    environment:
+      - "API_URI=api-io:3200"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./front:/usr/src/app/front
+  cpu-io:
+    container_name: cpu-io
+    build:
+      context: "./cpu"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./cpu:/usr/src/app/cpu
+  mongo-io:
+    container_name: mongo-io
+    image: mongo
+    logging:
+      driver: none
+    volumes:
+      - ./api/data:/data/db
+    ports:
+      - "27017:27017"
+  
